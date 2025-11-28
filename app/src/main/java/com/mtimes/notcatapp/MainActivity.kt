@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
@@ -37,6 +38,15 @@ class MainActivity : ComponentActivity() {
             NotCatAppTheme {
                 val dbHelper = UserDB(applicationContext, null)
                 val navController = rememberNavController()
+                val navigateTo = intent.getStringExtra("navigateTo")
+
+                LaunchedEffect(navigateTo) {
+                    if (navigateTo != null) {
+                        navController.navigate(navigateTo) {
+                            popUpTo(0)
+                        }
+                    }
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize())
                 {

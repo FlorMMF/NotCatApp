@@ -120,6 +120,7 @@ fun RegisterScreen(navController: NavHostController, onRegistrar: (String, Strin
                 onClick = {
                     onRegistrar(nomUsuario,correo,contrasena,confirmContrasena,context)
                     //println("Se ha registrado exitosamente")
+                    navController.popBackStack()
 
                 },
                 enabled = esValido,

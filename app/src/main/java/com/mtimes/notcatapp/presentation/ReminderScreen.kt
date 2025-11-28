@@ -312,6 +312,7 @@ fun ReminderScreen(navController: NavHostController,UserID: Int, onSaveReminder:
                     if (user != null) {
                         onSaveReminder(user.nomUs,title,description,date,time,
                             repeatOption,context)
+                        navController.popBackStack()
                     }
                     //println("Se ha registrado exitosamente")
 

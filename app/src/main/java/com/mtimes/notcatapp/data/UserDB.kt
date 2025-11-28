@@ -192,6 +192,7 @@ class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         val databaseAccess : SQLiteDatabase = getWritableDatabase()
         val values = ContentValues().apply{
             put(USER_RMND, user)
+
             put(TITLE_RMND,title)
             put(DESCRIPTION_RMND, description)
             put(DATE_RMND, date)
@@ -209,7 +210,9 @@ class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
                     fecha = date,
                     hora = time,
                     titulo = title,
-                    mensaje = description
+                    mensaje = description,
+                    reminderId = id.toInt()
+
                 )
             }
         }catch(e: Exception){
@@ -239,12 +242,18 @@ class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
                 fechaTexto,
                 horaTexto,
                 titulo,
-                descripcion
+                descripcion,
+                id
             )
         }
 
         cursor.close()
         db.close()
+    }
+
+    fun deleteReminder(id: Long): Int {
+        val db = writableDatabase
+        return db.delete("rmnd", "id = ?", arrayOf(id.toString()))
     }
 
 

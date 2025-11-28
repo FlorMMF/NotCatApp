@@ -11,7 +11,8 @@ fun programarNotificacionBD(
     fecha: String,
     hora: String,
     titulo: String,
-    mensaje: String
+    mensaje: String,
+    reminderId : Int
 ) {
     try {
 
@@ -39,7 +40,8 @@ fun programarNotificacionBD(
 
         val data = workDataOf(
             "titulo" to titulo,
-            "mensaje" to mensaje
+            "mensaje" to mensaje,
+            "reminderId" to reminderId
         )
 
         val request = OneTimeWorkRequestBuilder<NotificacionWorker>()
