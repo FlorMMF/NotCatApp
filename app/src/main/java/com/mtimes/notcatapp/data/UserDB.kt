@@ -9,7 +9,7 @@ import com.mtimes.notcatapp.model.UserVM
 import com.mtimes.notcatapp.notification.programarNotificacionBD
 
 
-class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
+open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
     //para crear y mantener la bd
