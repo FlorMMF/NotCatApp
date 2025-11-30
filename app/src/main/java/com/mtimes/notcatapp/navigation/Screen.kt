@@ -29,6 +29,19 @@ sealed class Screen (
     ) {
         fun createRoute(userId: Int) = "reminder_screen/$userId"
     } //para que reciba argumentos la funcion necesitas crear una ruta con el argumento que recibe
+
     @Serializable
-    object lists : Screen (route = "lists_screen", label = "Lists"  )
+    object lists : Screen (
+        route = "lists_screen/{userId}",
+        label = "Lists"
+    ){
+        fun createRouteLst(userId: Int) = "lists_screen/$userId"
+    }
+
+    object listsDetails : Screen (
+        route = "listsDetails_screen/{listId}",
+        label = "Lists_Details"
+    ){
+        fun createRouteLstDetail(listId: Int) = "listsDetails_screen/$listId"
+    }
 }

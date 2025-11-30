@@ -1,7 +1,9 @@
 package com.mtimes.notcatapp.presentation
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -59,17 +61,33 @@ fun PrincipalScreen(navController: NavHostController,
             Box(
                 modifier = Modifier.padding(innerPadding)
             ) {
-                ExtendedFloatingActionButton(
-                    onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
+                Row(
+                    modifier = Modifier.padding(6.dp),
+                    horizontalArrangement = Arrangement.Center,
+                ){
+                    ExtendedFloatingActionButton(
+                        onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
 
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
 
-                    icon = { Icon(Icons.Filled.Edit, "Añadir") },
-                    text = { Text(text = "Añadir recordatorio") },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
-                )
+                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                        text = { Text(text = "Añadir recordatorio") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+
+                    ExtendedFloatingActionButton(
+                        onClick = {  navController.navigate(Screen.lists.createRouteLst(userId.toInt())) } ,
+
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+
+                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                        text = { Text(text = "Añadir Lista") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+                }
+
             }
         }
     }

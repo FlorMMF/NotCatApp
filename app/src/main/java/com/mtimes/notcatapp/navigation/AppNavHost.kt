@@ -3,18 +3,25 @@ package com.mtimes.notcatapp.navigation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.mtimes.notcatapp.data.ListsRepository
 import com.mtimes.notcatapp.data.UserDB
+import com.mtimes.notcatapp.model.ListsViewModel
+import com.mtimes.notcatapp.model.ListsViewModelFactory
+import com.mtimes.notcatapp.presentation.ListDetailScreen
 import com.mtimes.notcatapp.presentation.LoginScreen
 import com.mtimes.notcatapp.presentation.PrincipalScreen
 import com.mtimes.notcatapp.presentation.RegisterScreen
 import com.mtimes.notcatapp.presentation.ReminderScreen
+import com.mtimes.notcatapp.presentation.listsScreen
 
 @Composable
 fun AppNavHost(
@@ -82,12 +89,53 @@ fun AppNavHost(
             )
         }
 
+        composable(
+            route = "listsDetails_screen/{listId}",
+            arguments = listOf(
+                navArgument("listId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
 
+            val listId = backStackEntry.arguments?.getInt("listId") ?: -1
+            val context = LocalContext.current
+            val db = UserDB(context, null)
 
-        composable(Screen.lists.route){
-            //ListScreen()
+            // Repository -> ViewModel
+            val repository = remember { ListsRepository(db) }
+            val viewModel: ListsViewModel = viewModel(
+                factory = ListsViewModelFactory(repository)
+            )
+
+            ListDetailScreen(
+                navController = navController,
+                listId = listId,
+                viewModel = viewModel
+            )
         }
 
+        composable(
+            route = "lists_screen/{userId}",
+            arguments = listOf(
+                navArgument("userId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+
+            val userId = backStackEntry.arguments?.getInt("userId") ?: -1
+            val context = LocalContext.current
+            val db = UserDB(context, null)
+
+            // Repository -> ViewModel
+            val repository = remember { ListsRepository(db) }
+            val viewModel: ListsViewModel = viewModel(
+                factory = ListsViewModelFactory(repository)
+            )
+
+            listsScreen(
+                navController = navController,
+                UserID = userId,
+                viewModel = viewModel
+            )
+        }
 
         composable(
             route = "reminder_screen/{userId}",
