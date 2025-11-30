@@ -9,7 +9,8 @@ import com.mtimes.notcatapp.data.ReminderRepository
 
 
 data class Reminder(
-    val userId: Int,
+    val user: String,
+    val reminderId: Int,
     val title: String,
     val description: String,
     val date: String,

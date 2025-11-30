@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Edit
 import com.mtimes.notcatapp.R
 import com.mtimes.notcatapp.data.UserDB
 import com.mtimes.notcatapp.navigation.Screen
@@ -117,6 +118,32 @@ fun PrincipalScreen(
                     )
                     ToDo()
                     Spacer(modifier = Modifier.height(16.dp))
+
+
+
+                    ExtendedFloatingActionButton(
+                        onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
+
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+
+                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                        text = { Text(text = "Añadir recordatorio") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+
+                    ExtendedFloatingActionButton(
+                        onClick = {  navController.navigate(Screen.editReminder.createRoute(userId.toInt(), 1)) } ,
+
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+
+                        icon = { Icon(Icons.Filled.Edit, "Editar") },
+                        text = { Text(text = "Editar recordatorio") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+
+
                 }
             }
         }

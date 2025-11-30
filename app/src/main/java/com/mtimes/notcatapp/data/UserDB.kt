@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.mtimes.notcatapp.model.Reminder
 import com.mtimes.notcatapp.model.UserVM
 import com.mtimes.notcatapp.notification.programarNotificacionBD
 
@@ -100,9 +101,79 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
 
         cursor.close()
-        db.close()
+
 
         return user
+    }
+
+
+
+    fun getReminderById (id: Int): Reminder?{
+        val db = this.readableDatabase
+        var reminder: Reminder? = null
+
+        val cursor = db.rawQuery(
+            "SELECT * FROM $TABLE_RMND WHERE $ID_RMND = ?",
+            arrayOf(id.toString())
+        )
+
+        if (cursor.moveToFirst()) {
+            val reminderId = id
+            val userId = cursor.getString(cursor.getColumnIndexOrThrow(USER_RMND))
+            val time = cursor.getString(cursor.getColumnIndexOrThrow(TIME_RMND))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow(DATE_RMND))
+            val repeat = cursor.getString(cursor.getColumnIndexOrThrow(REPEAT_RMND))
+            val title = cursor.getString(cursor.getColumnIndexOrThrow(TITLE_RMND))
+            val description = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION_RMND))
+
+
+            reminder = Reminder(
+                user = userId,
+                title = title,
+                description = description,
+                date = date,
+                time = time,
+                repeat = repeat,
+                reminderId = reminderId
+            )
+        }
+
+        cursor.close()
+
+
+        return reminder
+    }
+
+    fun updateReminder (
+        id: Int,
+        title: String,
+        description: String,
+        date: String,
+        time: String,
+        repeat: String
+    ): Boolean {
+
+        val db = this.writableDatabase
+        val values = ContentValues().apply{
+
+            put(TITLE_RMND,title)
+            put(DESCRIPTION_RMND, description)
+            put(DATE_RMND, date)
+            put(TIME_RMND, time)
+            put(REPEAT_RMND, repeat)
+
+        }
+
+        val rowsAffected = db.update(
+            TABLE_RMND,
+            values,
+            "$ID_RMND = ?",
+            arrayOf(id.toString()))
+
+        db.close()
+
+
+        return rowsAffected > 0
     }
 
 
@@ -260,7 +331,7 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     //para las variables de objetos
     companion object {
         private const val DATABASE_NAME = "REMINDERS_APP"
-        private const val DATABASE_VERSION = 9
+        private const val DATABASE_VERSION = 11
         const val TABLE_NAME = "user_info"
         const val ID_COL = "id"
         const val NAME_COL = "name"
