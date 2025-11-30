@@ -107,7 +107,8 @@ fun AppNavHost(
                             description = description,
                             date = date,
                             time = time,
-                            repeat = repeat
+                            repeat = repeat,
+                            context = context
                     )
 
                     if (result) {

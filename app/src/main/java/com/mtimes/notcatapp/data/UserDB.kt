@@ -8,6 +8,9 @@ import android.util.Log
 import com.mtimes.notcatapp.model.Reminder
 import com.mtimes.notcatapp.model.UserVM
 import com.mtimes.notcatapp.notification.programarNotificacionBD
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
@@ -144,37 +147,6 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return reminder
     }
 
-    fun updateReminder (
-        id: Int,
-        title: String,
-        description: String,
-        date: String,
-        time: String,
-        repeat: String
-    ): Boolean {
-
-        val db = this.writableDatabase
-        val values = ContentValues().apply{
-
-            put(TITLE_RMND,title)
-            put(DESCRIPTION_RMND, description)
-            put(DATE_RMND, date)
-            put(TIME_RMND, time)
-            put(REPEAT_RMND, repeat)
-
-        }
-
-        val rowsAffected = db.update(
-            TABLE_RMND,
-            values,
-            "$ID_RMND = ?",
-            arrayOf(id.toString()))
-
-        db.close()
-
-
-        return rowsAffected > 0
-    }
 
 
 
@@ -294,6 +266,49 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return id
     }
 
+    fun updateReminder (
+        id: Int,
+        title: String,
+        description: String,
+        date: String,
+        time: String,
+        repeat: String,
+        context: Context
+    ): Boolean {
+
+        val db = this.writableDatabase
+        val values = ContentValues().apply{
+
+            put(TITLE_RMND,title)
+            put(DESCRIPTION_RMND, description)
+            put(DATE_RMND, date)
+            put(TIME_RMND, time)
+            put(REPEAT_RMND, repeat)
+
+        }
+
+        val rowsAffected = db.update(
+            TABLE_RMND,
+            values,
+            "$ID_RMND = ?",
+            arrayOf(id.toString()))
+
+        db.close()
+
+        programarNotificacionBD(
+            context = context,
+            fecha = date,
+            hora = time,
+            titulo = title,
+            mensaje = description,
+            reminderId = id.toInt()
+
+        )
+
+
+        return rowsAffected > 0
+    }
+
     fun programarRecordatorio(context: Context, id: Int) {
         val db = this.readableDatabase
 
@@ -322,9 +337,67 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         db.close()
     }
 
+    fun deleteReminder(id: Int, context: Context) {
+        val reminder = getReminderById(id)
+
+        if (reminder != null) {
+            // Eliminar
+            deleteReminder(id.toLong())
+
+            // Crear siguiente si es repetitivo
+            repetirRecordatorio(reminder, context)
+        }
+    }
+
     fun deleteReminder(id: Long): Int {
         val db = writableDatabase
-        return db.delete("rmnd", "id = ?", arrayOf(id.toString()))
+        return db.delete( TABLE_RMND, "$ID_RMND = ?", arrayOf(id.toString()))
+    }
+
+    fun repetirRecordatorio(reminder: Reminder, context: Context) {
+        try {
+            // Si no se repite, salir
+            if (reminder.repeat == "Nunca") return
+
+            // Convertir fecha actual
+            val formatoFecha = SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES"))
+            val formatoHora = SimpleDateFormat("HH:mm", Locale("es", "ES"))
+
+            val fechaActual = formatoFecha.parse(reminder.date)
+            val horaActual = formatoHora.parse(reminder.time)
+
+            if (fechaActual == null || horaActual == null) return
+
+            val calFecha = Calendar.getInstance()
+            calFecha.time = fechaActual
+
+            // Calcular nueva fecha según repetición
+            when (reminder.repeat) {
+                "Cada semana" -> calFecha.add(Calendar.WEEK_OF_YEAR, 1)
+                "Cada mes" -> calFecha.add(Calendar.MONTH, 1)
+                "Cada año" -> calFecha.add(Calendar.YEAR, 1)
+            }
+
+            // Formatear nueva fecha
+            val nuevaFecha = formatoFecha.format(calFecha.time)
+            val nuevaHora = reminder.time
+
+            // Crear nuevo recordatorio
+            addReminder(
+                user = reminder.user,
+                title =reminder.title,
+                description = reminder.description,
+                date = nuevaFecha,
+                time = nuevaHora,
+                repeat = reminder.repeat,
+                context = context
+            )
+
+            Log.d("DB", "Se creó automáticamente un nuevo recordatorio repetitivo para la fecha $nuevaFecha")
+
+        } catch (e: Exception) {
+            Log.e("DB", "Error creando el siguiente recordatorio repetitivo", e)
+        }
     }
 
 

@@ -35,7 +35,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 if (reminderId != -1L) {
                     try {
                         val db = UserDB(context, null)
-                        // Asegúrate que tu método deleteReminder acepte Long o Int según lo definiste en UserDB
+
                         db.deleteReminder(reminderId)
                         db.close()
                         android.util.Log.d("NotCatApp", "Reminder eliminado: $reminderId")

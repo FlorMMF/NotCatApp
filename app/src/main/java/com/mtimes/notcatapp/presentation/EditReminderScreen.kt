@@ -115,7 +115,7 @@ fun editReminderScreen(
     LaunchedEffect(reminderID) {
         if (reminderID != -1) {
             scope.launch(Dispatchers.IO) {
-                Log.d("DEBUG_EDIT", "Buscando ID: $reminderID") // <--- LOG 1
+                Log.d("DEBUG_EDIT", "Buscando ID: $reminderID")
 
                 val reminder = try {
                     db.getReminderById(reminderID)
@@ -124,18 +124,18 @@ fun editReminderScreen(
                     null
                 }
 
-                Log.d("DEBUG_EDIT", "Resultado encontrado: $reminder") // <--- LOG 2
+                Log.d("DEBUG_EDIT", "Resultado encontrado: $reminder")
 
-                // Volvemos al hilo principal para actualizar la UI
+
                 withContext(Dispatchers.Main) {
                     reminder?.let {
                         title = it.title
-                        description = it.description // O el nombre que tenga en tu modelo
+                        description = it.description
                         date = it.date
                         time = it.time
                         repeatOption = it.repeat
 
-                        // Si repeatOption no es "Nunca", activamos el checkbox visualmente
+
                         if(it.repeat != "Nunca") {
                             activDropmenu = true
                         }
@@ -362,8 +362,7 @@ fun editReminderScreen(
                     if (user != null) {
                         scope.launch(Dispatchers.IO) {
                             if (reminderID != -1) {
-                                // --- MODO EDICIÓN ---
-                                // Llamamos directamente a la BD para actualizar
+
                                 try {
                                     db.updateReminder(
                                         id = reminderID,
@@ -371,21 +370,19 @@ fun editReminderScreen(
                                         description = description,
                                         date = date,
                                         time = time,
-                                        repeat = repeatOption
+                                        repeat = repeatOption,
+                                        context = context
                                     )
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
                             } else {
-                                // --- MODO CREACIÓN ---
-                                // Usamos el callback original que tenías para crear
-                                // O llamamos a db.insertReminder(...) aquí mismo si prefieres
+
                                 withContext(Dispatchers.Main) {
                                     onSaveReminder(user.nomUs, title, description, date, time, repeatOption, context)
                                 }
                             }
 
-                            // Volvemos a Main para navegar
                             withContext(Dispatchers.Main) {
                                 navController.popBackStack()
                             }
