@@ -23,4 +23,8 @@ class ReminderRepository(
             context)
     }
 
+    fun getReminderForUser(userId: Int): List<Reminder> {
+        return dbHelper.getAllReminders(userId)
+    }
+
 }

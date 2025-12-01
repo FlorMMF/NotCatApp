@@ -33,6 +33,9 @@ class ReminderViewModel(
         user = repository.getUserById(userId)
     }
 
+    fun loadReminder(UserId: Int) {
+        reminders = repository.getReminderForUser(UserId)
+    }
 
     fun saveReminder(reminder: Reminder) {
         repository.insertReminder(reminder)

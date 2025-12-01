@@ -79,7 +79,7 @@ fun AppNavHost(
             )
         ) { backStackEntry ->
 
-            val userId = backStackEntry.arguments?.getInt("userId") ?: -1L
+            val userId = backStackEntry.arguments?.getInt("userId") ?: -1
             val context = LocalContext.current
             val db = UserDB(context, null)
 

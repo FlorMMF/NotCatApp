@@ -52,6 +52,8 @@ import com.mtimes.notcatapp.data.UserDB
 import com.mtimes.notcatapp.model.ReminderViewModel
 import com.mtimes.notcatapp.navigation.Screen
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 
 
 // Pantalla raíz que incluye drawer + scaffold + NavHost
@@ -68,7 +70,9 @@ fun PrincipalScreen(
     val reminders = viewModel.reminders
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
+    LaunchedEffect(Unit) {
+        viewModel.loadReminder(userId)
+    }
     val imagePainter = painterResource(id = R.drawable.imagen_gatito)
 
     Box(
@@ -126,9 +130,31 @@ fun PrincipalScreen(
                         modifier = Modifier/*.offset(x = 50.dp, y = 30.dp)*/
                             .padding(start = 50.dp, bottom = 4.dp)
                     )
-                    ToDo()
-                    Spacer(modifier = Modifier.height(16.dp))
 
+                    ExtendedFloatingActionButton(
+                        onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
+
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+
+                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                        text = { Text(text = "Añadir recordatorio") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+
+                    /*ToDo()
+                    Spacer(modifier = Modifier.height(16.dp))*/
+
+                    LazyColumn(
+                        modifier = Modifier.padding(16.dp).fillMaxSize()
+                    ){
+                        items(reminders){ remind ->
+                            RemindCard(
+                                name = remind.title,
+                                onClick = {
+                                    //navController.navigate(Screen.listsDetails.createRouteLstDetail(list.id))
+                                }
+                            )
 
 
                     ExtendedFloatingActionButton(
@@ -160,6 +186,40 @@ fun PrincipalScreen(
     }
 
 }
+
+@Composable
+fun RemindCard(
+    name: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xCCC7719B),
+            contentColor = Color(0xCCFDD7D4)
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(6.dp)
+    ) {
+        Row(
+            Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+            Spacer(Modifier.width(16.dp))
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+}
+
 ///*************************************************************************************************
 @Composable
 fun DrawerContent(navController: NavHostController, userId: Long) {
@@ -188,7 +248,6 @@ fun DrawerContent(navController: NavHostController, userId: Long) {
 @Composable
 fun TopBar(
     onMenuClick: () -> Unit
-
 ) {
     CenterAlignedTopAppBar(
         navigationIcon = {
