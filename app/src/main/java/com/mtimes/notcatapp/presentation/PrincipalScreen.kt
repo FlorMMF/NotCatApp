@@ -56,7 +56,9 @@ import com.mtimes.notcatapp.navigation.Screen
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
 // Pantalla raíz que incluye drawer + scaffold + NavHost
@@ -70,7 +72,7 @@ fun PrincipalScreen(
     userId: Int,
     viewModel: ReminderViewModel) {
 
-    val lists = viewModel.lists
+    //val lists = viewModel.lists
     val reminders = viewModel.reminders
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -118,15 +120,15 @@ fun PrincipalScreen(
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        numList(
+                        /*numList(
                             numlists = lists.loadLists().size(),
                             onClick = {
                                 navController.navigate(Screen.Reminder.createRoute(userId.toInt()))
                             }
-                        )
+                        )*/
                         Spacer(modifier = Modifier.width(32.dp))
                         Image(
                             painter = painterResource(id = R.drawable.imagen_gatito),
@@ -135,21 +137,37 @@ fun PrincipalScreen(
                                 .size(width = 120.dp, height = 120.dp)
                             //.offset(x = 200.dp, y = 0.dp)
                         )
+
+                        Column(
+                            modifier = Modifier .padding(horizontal = 6.dp, vertical = 24.dp)) {
+                                ExtendedFloatingActionButton(
+
+                                onClick = { navController.navigate(Screen.Reminder.createRoute(userId.toInt())) },
+
+                                containerColor = Color(0xCCC7719B),
+                                contentColor = Color.White,
+
+                                icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                                text = { Text(text = "Añadir recordatorio", fontWeight = FontWeight.Bold, style = TextStyle(fontSize = 16.sp))},
+                                modifier = Modifier.padding(16.dp)
+                            )
+
+                            ExtendedFloatingActionButton(
+                                //enviar a las listas
+                                onClick = { },
+
+                                containerColor = Color(0xCCC7719B),
+                                contentColor = Color.White,
+
+                                icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                                text = { Text(text = "Añadir Lista", fontWeight = FontWeight.Bold, style = TextStyle(fontSize = 16.sp))},
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    ExtendedFloatingActionButton(
-
-                        onClick = { navController.navigate(Screen.Reminder.createRoute(userId.toInt())) },
-
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-
-                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
-                        text = { Text(text = "Añadir recordatorio") },
-                        modifier = Modifier
-                            .align(Alignment.End)//padding(16.dp)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    //Spacer(modifier = Modifier.height(34.dp))
+                    //Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
                         text = "Tareas Pendientes:",
@@ -209,7 +227,8 @@ fun RemindCard(
             Spacer(Modifier.width(16.dp))
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleMedium
+                style = TextStyle(fontSize = 18.sp),
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
@@ -300,10 +319,10 @@ fun numList(/*navController: NavHostController,*/
                 )
                 Spacer(Modifier.width(2.dp))
 
-                Text(
+                /*Text(
                     text = numlists,
                     style = MaterialTheme.typography.titleMedium
-                )
+                )*/
             }
         }
     }
