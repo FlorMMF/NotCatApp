@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.mtimes.notcatapp.model.Reminder
 import com.mtimes.notcatapp.model.UserVM
 import com.mtimes.notcatapp.notification.programarNotificacionBD
 
@@ -100,12 +101,10 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
 
         cursor.close()
-        db.close()
+
 
         return user
     }
-
-
 
     fun checkUser(user_name: String): Boolean {
         val sqLiteDatabase = this.readableDatabase
@@ -223,6 +222,41 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return id
     }
 
+
+
+
+    fun getAllReminders(userId: Int): List<Reminder> {
+        val db = readableDatabase
+        val listReminder = mutableListOf<Reminder>()
+
+        val user = getUserById(userId)
+        if (user == null) return emptyList()
+
+        val cursor = db.query(
+            TABLE_RMND,
+            arrayOf(ID_RMND, USER_RMND, TITLE_RMND, DESCRIPTION_RMND, DATE_RMND, TIME_RMND, REPEAT_RMND),
+            "$USER_RMND=?",
+            arrayOf(user.nomUs),
+            null, null, null
+        )
+
+        while (cursor.moveToNext()){
+            listReminder.add( Reminder(
+                userId = cursor.getInt(1),
+                title = cursor.getString(2),
+                description = cursor.getString(3),
+                date = cursor.getString(4),
+                time = cursor.getString(5),
+                repeat = cursor.getString(6),
+                )
+            )
+        }
+
+        cursor.close()
+        return listReminder
+
+    }
+
     fun programarRecordatorio(context: Context, id: Int) {
         val db = this.readableDatabase
 
@@ -248,7 +282,7 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
 
         cursor.close()
-        db.close()
+
     }
 
     fun deleteReminder(id: Long): Int {
