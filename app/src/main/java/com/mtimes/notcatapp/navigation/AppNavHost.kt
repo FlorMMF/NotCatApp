@@ -15,6 +15,11 @@ import com.mtimes.notcatapp.presentation.LoginScreen
 import com.mtimes.notcatapp.presentation.PrincipalScreen
 import com.mtimes.notcatapp.presentation.RegisterScreen
 import com.mtimes.notcatapp.presentation.ReminderScreen
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mtimes.notcatapp.data.ReminderRepository
+import com.mtimes.notcatapp.model.ReminderViewModel
+import com.mtimes.notcatapp.model.ReminderViewModelFactory
 
 @Composable
 fun AppNavHost(
@@ -69,16 +74,25 @@ fun AppNavHost(
         composable(
             route = Screen.principal.route,
             arguments = listOf(
-                navArgument("userId") { type = NavType.LongType }
+                navArgument("userId") { type = NavType.IntType }
             )
         ) { backStackEntry ->
 
-            val userId = backStackEntry.arguments?.getLong("userId") ?: -1L
+            val userId = backStackEntry.arguments?.getInt("userId") ?: -1L
+            val context = LocalContext.current
+            val db = UserDB(context, null)
+
+            // Repository -> ViewModel
+           val repository = remember { ReminderRepository(db, context) }
+            val viewModel: ReminderViewModel = viewModel(
+                factory = ReminderViewModelFactory(repository)
+            )
 
             PrincipalScreen(
                 navController = navController,
                 dbHelper = dbHelper,
-                userId = userId
+                userId = userId,
+                viewModel = viewModel
             )
         }
 

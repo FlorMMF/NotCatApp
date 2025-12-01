@@ -44,6 +44,9 @@ class ReminderViewModelFactory(
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ReminderViewModel(repo) as T
+        if (modelClass.isAssignableFrom(ReminderViewModel::class.java)) {
+            return ReminderViewModel(repo) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
