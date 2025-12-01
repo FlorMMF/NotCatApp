@@ -3,6 +3,8 @@ package com.mtimes.notcatapp.presentation
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
 import android.content.Context
+import android.util.Log
+import androidx.activity.result.launch
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -54,12 +56,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mtimes.notcatapp.R
 import com.mtimes.notcatapp.data.ReminderRepository
 import com.mtimes.notcatapp.data.UserDB
 import com.mtimes.notcatapp.model.ReminderViewModel
 import com.mtimes.notcatapp.model.ReminderViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
 
@@ -67,10 +73,14 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun ReminderScreen(
+fun editReminderScreen(
     navController: NavHostController,
-    UserID: Int, onSaveReminder: (String, String, String, String, String, String, Context) -> Unit){
+    UserID: Int,
+    reminderID: Int,
+    onSaveReminder: (String, String, String, String, String, String, Context) -> Unit){
+
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     // Build DB → Repository → ViewModel
     val db = remember { UserDB(context, null) }
@@ -85,28 +95,57 @@ fun ReminderScreen(
 
     val user = viewModel.user
 
-    // Load user once
-    LaunchedEffect(UserID) {
-        viewModel.loadUser(UserID)
-    }
-    val datePickerState = rememberDatePickerState()
-
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
     var repeatOption by remember { mutableStateOf("Nunca") }
 
-    val calendar = Calendar.getInstance()
-    val hour = calendar.get(Calendar.HOUR_OF_DAY)
-    val minute = calendar.get(Calendar.MINUTE)
-
     var showDialogC by remember { mutableStateOf(false) }
     var showDialogT by remember { mutableStateOf(false) }
     var activDropmenu by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
 
+    val datePickerState = rememberDatePickerState()
+    val calendar = Calendar.getInstance()
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
     val options = listOf("Nunca", "Cada año", "Cada mes", "Cada semana")
+
+    LaunchedEffect(reminderID) {
+        if (reminderID != -1) {
+            scope.launch(Dispatchers.IO) {
+                Log.d("DEBUG_EDIT", "Buscando ID: $reminderID")
+
+                val reminder = try {
+                    db.getReminderById(reminderID)
+                } catch (e: Exception) {
+                    Log.e("DEBUG_EDIT", "Error al buscar", e)
+                    null
+                }
+
+                Log.d("DEBUG_EDIT", "Resultado encontrado: $reminder")
+
+
+                withContext(Dispatchers.Main) {
+                    reminder?.let {
+                        title = it.title
+                        description = it.description
+                        date = it.date
+                        time = it.time
+                        repeatOption = it.repeat
+
+
+                        if(it.repeat != "Nunca") {
+                            activDropmenu = true
+                        }
+                    }
+                }
+            }
+        }
+        // Cargar usuario
+        viewModel.loadUser(UserID)
+    }
 
     val esValido by derivedStateOf {
         title.isNotEmpty() &&
@@ -116,6 +155,7 @@ fun ReminderScreen(
                 repeatOption.isNotEmpty()
         //errorText.isEmpty()
     }
+
 
 
     Box(
@@ -134,7 +174,11 @@ fun ReminderScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Crear Recordatorio",color = Color(0xCCC7719B), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Editar Recordatorio",
+                color = Color(0xCCC7719B),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold)
 
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -143,6 +187,7 @@ fun ReminderScreen(
                 value = title,
                 onValueChange = { title = it},
                 label = { Text("Titulo") }
+
             )
 
             OutlinedTextField(
@@ -165,7 +210,7 @@ fun ReminderScreen(
                         contentColor = Color.White
                     )
                 ){
-                    Text("Elegir fecha")
+                    Text(if(date.isEmpty()) "Elegir fecha" else date)
                 }
 
 
@@ -176,7 +221,7 @@ fun ReminderScreen(
                         contentColor = Color.White
                     )
                 ){
-                    Text("Elegir hora")
+                    Text(if(time.isEmpty()) "Elegir hora" else time)
                 }
             }
 
@@ -188,6 +233,9 @@ fun ReminderScreen(
                     confirmButton = {
                         TextButton(onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
+                                val calendarDate = Calendar.getInstance()
+                                calendarDate.timeInMillis = millis
+                                calendarDate.add(Calendar.DAY_OF_MONTH, 1) // A veces necesario con DatePicker
                                 val formatter  = SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES"))
                                 date = formatter.format(Date(millis))
                             }
@@ -312,9 +360,33 @@ fun ReminderScreen(
             FilledTonalButton(
                 onClick = {
                     if (user != null) {
-                        onSaveReminder(user.nomUs,title,description,date,time,
-                            repeatOption,context)
-                        navController.popBackStack()
+                        scope.launch(Dispatchers.IO) {
+                            if (reminderID != -1) {
+
+                                try {
+                                    db.updateReminder(
+                                        id = reminderID,
+                                        title = title,
+                                        description = description,
+                                        date = date,
+                                        time = time,
+                                        repeat = repeatOption,
+                                        context = context
+                                    )
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            } else {
+
+                                withContext(Dispatchers.Main) {
+                                    onSaveReminder(user.nomUs, title, description, date, time, repeatOption, context)
+                                }
+                            }
+
+                            withContext(Dispatchers.Main) {
+                                navController.popBackStack()
+                            }
+                        }
                     }
                     //println("Se ha registrado exitosamente")
 
@@ -337,6 +409,6 @@ fun ReminderScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ReminderScreenPreview() {
+fun editReminderScreenPreview() {
     ReminderScreen(navController = rememberNavController(),-1, onSaveReminder = { _, _, _, _, _, _, _ ->})
 }

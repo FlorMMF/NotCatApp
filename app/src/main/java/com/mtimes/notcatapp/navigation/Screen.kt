@@ -21,6 +21,15 @@ sealed class Screen (
         fun createRoute(userId: Long) = "principal_screen/$userId"
     }
 
+    @Serializable
+    object editReminder : Screen(
+        route = "edit_reminder_screen/{userId}/{reminderId}",
+        label = "Edit Reminder"
+    ) {
+        fun createRoute(userId: Int, reminderId: Int) = "edit_reminder_screen/$userId/$reminderId"
+
+    }
+
 
     @Serializable
     object Reminder : Screen(

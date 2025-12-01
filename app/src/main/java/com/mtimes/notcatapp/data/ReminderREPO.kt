@@ -14,8 +14,9 @@ class ReminderRepository(
 
     fun insertReminder(reminder: Reminder): Long {
         return dbHelper.addReminder(
-            getUserById(reminder.userId).toString(),reminder.
-            title, reminder.description,
+            reminder.user,
+            reminder.title,
+            reminder.description,
             reminder.date,
             reminder.time,
             reminder.repeat,
