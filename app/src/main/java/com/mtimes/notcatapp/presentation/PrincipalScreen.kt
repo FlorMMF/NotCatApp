@@ -2,6 +2,7 @@ package com.mtimes.notcatapp.presentation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,10 +51,12 @@ import androidx.compose.material.icons.filled.Edit
 import com.mtimes.notcatapp.R
 import com.mtimes.notcatapp.data.UserDB
 import com.mtimes.notcatapp.model.ReminderViewModel
+
 import com.mtimes.notcatapp.navigation.Screen
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.ui.text.font.FontWeight
 
 
 // Pantalla raíz que incluye drawer + scaffold + NavHost
@@ -67,6 +70,7 @@ fun PrincipalScreen(
     userId: Int,
     viewModel: ReminderViewModel) {
 
+    val lists = viewModel.lists
     val reminders = viewModel.reminders
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -74,6 +78,7 @@ fun PrincipalScreen(
         viewModel.loadReminder(userId)
     }
     val imagePainter = painterResource(id = R.drawable.imagen_gatito)
+    val ColorPaletaRosa = Color(0xCCC7719B)
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -88,7 +93,11 @@ fun PrincipalScreen(
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {//se agrego esto y ya se puede ver el fondo
-                ModalDrawerSheet(drawerContainerColor = Color(0xAA000000)) {}
+                //ModalDrawerSheet(drawerContainerColor = Color(0xAA000000)) {}
+                DrawerContent(
+                    navController = navController,
+                    userId = userId.toLong()
+                )
 
             }
         ) {
@@ -112,7 +121,12 @@ fun PrincipalScreen(
                             .padding(horizontal = 24.dp, vertical = 24.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        numList(navController)
+                        numList(
+                            numlists = lists.loadLists().size(),
+                            onClick = {
+                                navController.navigate(Screen.Reminder.createRoute(userId.toInt()))
+                            }
+                        )
                         Spacer(modifier = Modifier.width(32.dp))
                         Image(
                             painter = painterResource(id = R.drawable.imagen_gatito),
@@ -123,15 +137,9 @@ fun PrincipalScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Tareas Pendientes:",
-                        fontSize = 18.sp,
-                        color = Color.Black,
-                        modifier = Modifier/*.offset(x = 50.dp, y = 30.dp)*/
-                            .padding(start = 50.dp, bottom = 4.dp)
-                    )
 
                     ExtendedFloatingActionButton(
+
                         onClick = { navController.navigate(Screen.Reminder.createRoute(userId.toInt())) },
 
                         contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -139,8 +147,20 @@ fun PrincipalScreen(
                         icon = { Icon(Icons.Filled.Edit, "Añadir") },
                         text = { Text(text = "Añadir recordatorio") },
                         modifier = Modifier
-                            .padding(16.dp)
+                            .align(Alignment.End)//padding(16.dp)
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "Tareas Pendientes:",
+                        color = Color(0xCCC7719B),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier/*.offset(x = 50.dp, y = 30.dp)*/
+                            .padding(start = 30.dp, bottom = 4.dp)
+                    )
+
+
 
                     LazyColumn(
                         modifier = Modifier.padding(16.dp).fillMaxSize()
@@ -242,7 +262,10 @@ fun TopBar(
 }
 
         @Composable
-fun numList(navController: NavHostController) {
+fun numList(/*navController: NavHostController,*/
+            numlists: Int,
+            onClick: () -> Unit
+    ) {
     val ColorPaletaRosa = Color(0xCCC7719B)
 
     val offsetX = 30.dp
@@ -253,18 +276,35 @@ fun numList(navController: NavHostController) {
     .offset(x = offsetX, y = offsetY)*/
     ) {
         Card(
+            //onClick = onCardClick
 
             modifier = Modifier.size(width = 140.dp, height = 140.dp),
             colors = CardDefaults.cardColors(
                 containerColor = ColorPaletaRosa
             )
         ) {
-            Text(
-                text = "\tNúmero de  Listas",
-                fontSize = 10.sp,
-                textAlign = TextAlign.Start
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                contentAlignment = Alignment.TopStart
+            ) {
+                Text(
+                    text = "\tNúmero de  Listas",
+                    fontSize = 15.sp,
 
+                    //modifier = Modifier.fillMaxWidth(),
+                    /*softWrap = false,
+                    maxLines = 1,*/
+                    //textAlign = TextAlign.Start
+                )
+                Spacer(Modifier.width(2.dp))
+
+                Text(
+                    text = numlists,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
         }
     }
 
