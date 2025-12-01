@@ -77,7 +77,7 @@ fun PrincipalScreen(
 
     Box(
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         Image(//ya se puede ver el fondo
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = null,
@@ -85,7 +85,7 @@ fun PrincipalScreen(
             modifier = Modifier.matchParentSize()
         )
 
-        ModalNavigationDrawer (
+        ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {//se agrego esto y ya se puede ver el fondo
                 ModalDrawerSheet(drawerContainerColor = Color(0xAA000000)) {}
@@ -106,12 +106,12 @@ fun PrincipalScreen(
             ) { innerPadding ->
                 Column(
                     modifier = Modifier.padding(innerPadding).fillMaxSize()
-                ){
+                ) {
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 24.dp, vertical = 24.dp),
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         numList(navController)
                         Spacer(modifier = Modifier.width(32.dp))
                         Image(
@@ -132,7 +132,7 @@ fun PrincipalScreen(
                     )
 
                     ExtendedFloatingActionButton(
-                        onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
+                        onClick = { navController.navigate(Screen.Reminder.createRoute(userId.toInt())) },
 
                         contentColor = MaterialTheme.colorScheme.onPrimary,
 
@@ -141,50 +141,25 @@ fun PrincipalScreen(
                         modifier = Modifier
                             .padding(16.dp)
                     )
-
-                    /*ToDo()
-                    Spacer(modifier = Modifier.height(16.dp))*/
 
                     LazyColumn(
                         modifier = Modifier.padding(16.dp).fillMaxSize()
-                    ){
-                        items(reminders){ remind ->
+                    ) {
+                        items(reminders) { remind ->
                             RemindCard(
                                 name = remind.title,
                                 onClick = {
-                                    //navController.navigate(Screen.listsDetails.createRouteLstDetail(list.id))
+                                    navController.navigate(Screen.editReminder.createRoute(userId, remind.reminderId))
                                 }
                             )
 
-
-                    ExtendedFloatingActionButton(
-                        onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
-
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-
-                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
-                        text = { Text(text = "Añadir recordatorio") },
-                        modifier = Modifier
-                            .padding(16.dp)
-                    )
-
-                    ExtendedFloatingActionButton(
-                        onClick = {  navController.navigate(Screen.editReminder.createRoute(userId.toInt(), 1)) } ,
-
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-
-                        icon = { Icon(Icons.Filled.Edit, "Editar") },
-                        text = { Text(text = "Editar recordatorio") },
-                        modifier = Modifier
-                            .padding(16.dp)
-                    )
-
-
+                        }
+                    }
                 }
             }
+
         }
     }
-
 }
 
 @Composable
@@ -230,7 +205,9 @@ fun DrawerContent(navController: NavHostController, userId: Long) {
             label = { Text("Recordatorios") },
             selected = false,
             onClick = {
-                navController.navigate(Screen.Reminder.createRoute(userId.toInt())) { launchSingleTop = true }
+                navController.navigate(Screen.Reminder.createRoute(userId.toInt())) {
+                    launchSingleTop = true
+                }
             }
         )
         Divider()
@@ -264,8 +241,8 @@ fun TopBar(
     )
 }
 
-@Composable
-fun numList(navController: NavHostController){
+        @Composable
+fun numList(navController: NavHostController) {
     val ColorPaletaRosa = Color(0xCCC7719B)
 
     val offsetX = 30.dp
@@ -273,16 +250,17 @@ fun numList(navController: NavHostController){
     Box(
         modifier = Modifier
         /*modifier = Modifier/*.padding(paddingValues)*///se agrego y se puede ver la tarjeta de num de listas
-            .offset(x = offsetX, y = offsetY)*/
-    ){
+    .offset(x = offsetX, y = offsetY)*/
+    ) {
         Card(
 
             modifier = Modifier.size(width = 140.dp, height = 140.dp),
             colors = CardDefaults.cardColors(
                 containerColor = ColorPaletaRosa
             )
-        ){
-            Text(text = "\tNúmero de  Listas",
+        ) {
+            Text(
+                text = "\tNúmero de  Listas",
                 fontSize = 10.sp,
                 textAlign = TextAlign.Start
             )
@@ -296,9 +274,9 @@ fun numList(navController: NavHostController){
 fun ToDo(
     name: String,
     onClick: () -> Unit
-){//Card de tareas pendientes
-   /* val offsetX = 20.dp
-    val offsetY = 50.dp*/
+) {//Card de tareas pendientes
+    /* val offsetX = 20.dp
+val offsetY = 50.dp*/
 
     OutlinedCard(
         modifier = Modifier
@@ -317,13 +295,15 @@ fun ToDo(
                 .padding(20.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
                 text = name,
                 style = MaterialTheme.typography.titleMedium
             )
         }
     }
+}
+
     /*Box(
         modifier = Modifier/*.padding(innerPadding)*/
             .offset(x = offsetX)
@@ -346,20 +326,7 @@ fun ToDo(
             )
         }
     }*/
-}
-/*
-@Preview(showBackground = true, showSystemUi = true)//la preview sigue sin funcionar, se esta usando la conexion directa con el celular para poder visualizar la Screen
-@Composable
-fun PrincipalScreenPreview() {
-    PrincipalScreen(
-        navController = rememberNavController(),
-        dbHelper = UserDB(
-            context = LocalContext.current,
-            factory = TODO()
-        ),
-        userId = 1
-    )
-}*/
+
 
 
 

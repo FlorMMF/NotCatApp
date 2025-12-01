@@ -286,12 +286,13 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
 
         while (cursor.moveToNext()){
             listReminder.add( Reminder(
-                userId = cursor.getInt(1),
+                user = cursor.getString(1),
                 title = cursor.getString(2),
                 description = cursor.getString(3),
                 date = cursor.getString(4),
                 time = cursor.getString(5),
                 repeat = cursor.getString(6),
+                reminderId = cursor.getInt(0)
                 )
             )
         }
