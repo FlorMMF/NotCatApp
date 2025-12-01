@@ -33,6 +33,9 @@ class ReminderViewModel(
         user = repository.getUserById(userId)
     }
 
+    fun loadReminder(UserId: Int) {
+        reminders = repository.getReminderForUser(UserId)
+    }
 
     fun saveReminder(reminder: Reminder) {
         repository.insertReminder(reminder)
@@ -45,6 +48,9 @@ class ReminderViewModelFactory(
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ReminderViewModel(repo) as T
+        if (modelClass.isAssignableFrom(ReminderViewModel::class.java)) {
+            return ReminderViewModel(repo) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

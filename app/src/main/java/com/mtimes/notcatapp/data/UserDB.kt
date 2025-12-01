@@ -266,6 +266,41 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return id
     }
 
+
+
+
+    fun getAllReminders(userId: Int): List<Reminder> {
+        val db = readableDatabase
+        val listReminder = mutableListOf<Reminder>()
+
+        val user = getUserById(userId)
+        if (user == null) return emptyList()
+
+        val cursor = db.query(
+            TABLE_RMND,
+            arrayOf(ID_RMND, USER_RMND, TITLE_RMND, DESCRIPTION_RMND, DATE_RMND, TIME_RMND, REPEAT_RMND),
+            "$USER_RMND=?",
+            arrayOf(user.nomUs),
+            null, null, null
+        )
+
+        while (cursor.moveToNext()){
+            listReminder.add( Reminder(
+                userId = cursor.getInt(1),
+                title = cursor.getString(2),
+                description = cursor.getString(3),
+                date = cursor.getString(4),
+                time = cursor.getString(5),
+                repeat = cursor.getString(6),
+                )
+            )
+        }
+
+        cursor.close()
+        return listReminder
+
+    }
+
     fun updateReminder (
         id: Int,
         title: String,
@@ -334,7 +369,7 @@ open class UserDB(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
 
         cursor.close()
-        db.close()
+
     }
 
     fun deleteReminder(id: Int, context: Context) {

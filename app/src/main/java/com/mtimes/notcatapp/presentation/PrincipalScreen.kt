@@ -1,6 +1,7 @@
 package com.mtimes.notcatapp.presentation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,10 +41,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.modifier.modifierLocalMapOf
+import androidx.lifecycle.ViewModel
 import androidx.compose.material.icons.filled.Edit
 import com.mtimes.notcatapp.R
 import com.mtimes.notcatapp.data.UserDB
+import com.mtimes.notcatapp.model.ReminderViewModel
 import com.mtimes.notcatapp.navigation.Screen
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 
 
 // Pantalla raíz que incluye drawer + scaffold + NavHost
@@ -54,11 +64,15 @@ import com.mtimes.notcatapp.navigation.Screen
 fun PrincipalScreen(
     navController: NavHostController,
     dbHelper: UserDB,
-    userId: Long) {
+    userId: Int,
+    viewModel: ReminderViewModel) {
 
+    val reminders = viewModel.reminders
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
+    LaunchedEffect(Unit) {
+        viewModel.loadReminder(userId)
+    }
     val imagePainter = painterResource(id = R.drawable.imagen_gatito)
 
     Box(
@@ -74,7 +88,7 @@ fun PrincipalScreen(
         ModalNavigationDrawer (
             drawerState = drawerState,
             drawerContent = {//se agrego esto y ya se puede ver el fondo
-                ModalDrawerSheet(drawerContainerColor = Color(0xAA000000)) {DrawerContent(navController = navController, userId )}
+                ModalDrawerSheet(drawerContainerColor = Color(0xAA000000)) {}
 
             }
         ) {
@@ -116,9 +130,31 @@ fun PrincipalScreen(
                         modifier = Modifier/*.offset(x = 50.dp, y = 30.dp)*/
                             .padding(start = 50.dp, bottom = 4.dp)
                     )
-                    ToDo()
-                    Spacer(modifier = Modifier.height(16.dp))
 
+                    ExtendedFloatingActionButton(
+                        onClick = {  navController.navigate(Screen.Reminder.createRoute(userId.toInt())) } ,
+
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+
+                        icon = { Icon(Icons.Filled.Edit, "Añadir") },
+                        text = { Text(text = "Añadir recordatorio") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                    )
+
+                    /*ToDo()
+                    Spacer(modifier = Modifier.height(16.dp))*/
+
+                    LazyColumn(
+                        modifier = Modifier.padding(16.dp).fillMaxSize()
+                    ){
+                        items(reminders){ remind ->
+                            RemindCard(
+                                name = remind.title,
+                                onClick = {
+                                    //navController.navigate(Screen.listsDetails.createRouteLstDetail(list.id))
+                                }
+                            )
 
 
                     ExtendedFloatingActionButton(
@@ -150,6 +186,40 @@ fun PrincipalScreen(
     }
 
 }
+
+@Composable
+fun RemindCard(
+    name: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xCCC7719B),
+            contentColor = Color(0xCCFDD7D4)
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(6.dp)
+    ) {
+        Row(
+            Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+            Spacer(Modifier.width(16.dp))
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+}
+
 ///*************************************************************************************************
 @Composable
 fun DrawerContent(navController: NavHostController, userId: Long) {
@@ -178,7 +248,6 @@ fun DrawerContent(navController: NavHostController, userId: Long) {
 @Composable
 fun TopBar(
     onMenuClick: () -> Unit
-
 ) {
     CenterAlignedTopAppBar(
         navigationIcon = {
@@ -224,11 +293,38 @@ fun numList(navController: NavHostController){
 }
 
 @Composable
-fun ToDo(){//Card de tareas pendientes
-    val offsetX = 20.dp
-    val offsetY = 50.dp
+fun ToDo(
+    name: String,
+    onClick: () -> Unit
+){//Card de tareas pendientes
+   /* val offsetX = 20.dp
+    val offsetY = 50.dp*/
 
-    Box(
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xCCC7719B),
+            contentColor = Color(0xCCFDD7D4)
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(6.dp)
+    ) {
+        Row(
+            Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+    /*Box(
         modifier = Modifier/*.padding(innerPadding)*/
             .offset(x = offsetX)
     ){
@@ -249,9 +345,9 @@ fun ToDo(){//Card de tareas pendientes
                 fontSize = 10.sp
             )
         }
-    }
+    }*/
 }
-
+/*
 @Preview(showBackground = true, showSystemUi = true)//la preview sigue sin funcionar, se esta usando la conexion directa con el celular para poder visualizar la Screen
 @Composable
 fun PrincipalScreenPreview() {
@@ -263,7 +359,7 @@ fun PrincipalScreenPreview() {
         ),
         userId = 1
     )
-}
+}*/
 
 
 
